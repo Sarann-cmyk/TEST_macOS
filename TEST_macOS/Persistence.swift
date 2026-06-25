@@ -39,6 +39,8 @@ struct PersistenceController {
             description.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(
                 containerIdentifier: "iCloud.WINNER.ltd.TEST-iOS"
             )
+            description.setOption(true as NSNumber, forKey: NSMigratePersistentStoresAutomaticallyOption)
+            description.setOption(true as NSNumber, forKey: NSInferMappingModelAutomaticallyOption)
         }
         container.loadPersistentStores { _, error in
             if let error = error as NSError? {
