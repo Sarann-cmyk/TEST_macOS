@@ -10,6 +10,7 @@ import CoreData
 
 @main
 struct TEST_macOSApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     let persistenceController = PersistenceController.shared
 
     var body: some Scene {
