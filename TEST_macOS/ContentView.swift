@@ -12,9 +12,9 @@ struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
     @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Task.createdAt, ascending: false)],
+        sortDescriptors: [NSSortDescriptor(keyPath: \TaskItem.createdAt, ascending: false)],
         animation: .default)
-    private var tasks: FetchedResults<Task>
+    private var tasks: FetchedResults<TaskItem>
 
     @State private var newTaskTitle = ""
 
@@ -49,7 +49,7 @@ struct ContentView: View {
     private func addTask() {
         let title = newTaskTitle.trimmingCharacters(in: .whitespaces)
         guard !title.isEmpty else { return }
-        let task = Task(context: viewContext)
+        let task = TaskItem(context: viewContext)
         task.title = title
         task.createdAt = Date()
         try? viewContext.save()

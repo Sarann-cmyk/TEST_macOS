@@ -15,7 +15,7 @@ struct PersistenceController {
         let result = PersistenceController(inMemory: true)
         let viewContext = result.container.viewContext
         for i in 1...5 {
-            let task = Task(context: viewContext)
+            let task = TaskItem(context: viewContext)
             task.title = "Task \(i)"
             task.createdAt = Date()
         }
