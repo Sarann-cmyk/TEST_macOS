@@ -42,9 +42,9 @@ struct PersistenceController {
             description.setOption(true as NSNumber, forKey: NSMigratePersistentStoresAutomaticallyOption)
             description.setOption(true as NSNumber, forKey: NSInferMappingModelAutomaticallyOption)
         }
-        container.loadPersistentStores { _, error in
+        container.loadPersistentStores { description, error in
             if let error = error as NSError? {
-                fatalError("Unresolved error \(error), \(error.userInfo)")
+                print("[CoreData] Failed to load store: \(error), \(error.userInfo)")
             }
         }
         container.viewContext.automaticallyMergesChangesFromParent = true
