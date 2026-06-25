@@ -12,72 +12,57 @@ struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
     @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
+        sortDescriptors: [NSSortDescriptor(keyPath: \Task.createdAt, ascending: false)],
         animation: .default)
-    private var items: FetchedResults<Item>
+    private var tasks: FetchedResults<Task>
+
+    @State private var newTaskTitle = ""
 
     var body: some View {
-        NavigationView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp!, formatter: itemFormatter)")
-                    } label: {
-                        Text(item.timestamp!, formatter: itemFormatter)
-                    }
-                }
-                .onDelete(perform: deleteItems)
+        VStack(spacing: 0) {
+            HStack {
+                TextField("New task...", text: $newTaskTitle)
+                    .textFieldStyle(.roundedBorder)
+                    .onSubmit(addTask)
+                Button("Add", action: addTask)
+                    .disabled(newTaskTitle.trimmingCharacters(in: .whitespaces).isEmpty)
             }
-            .toolbar {
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
+            .padding()
+
+            Divider()
+
+            if tasks.isEmpty {
+                ContentUnavailableView("No tasks", systemImage: "checkmark.circle")
+                    .frame(maxHeight: .infinity)
+            } else {
+                List {
+                    ForEach(tasks) { task in
+                        Text(task.title ?? "")
                     }
+                    .onDelete(perform: deleteTasks)
                 }
             }
-            Text("Select an item")
         }
+        .frame(minWidth: 400, minHeight: 300)
     }
 
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
-        }
+    private func addTask() {
+        let title = newTaskTitle.trimmingCharacters(in: .whitespaces)
+        guard !title.isEmpty else { return }
+        let task = Task(context: viewContext)
+        task.title = title
+        task.createdAt = Date()
+        try? viewContext.save()
+        newTaskTitle = ""
     }
 
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            offsets.map { items[$0] }.forEach(viewContext.delete)
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
-        }
+    private func deleteTasks(offsets: IndexSet) {
+        offsets.map { tasks[$0] }.forEach(viewContext.delete)
+        try? viewContext.save()
     }
 }
 
-private let itemFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.dateStyle = .short
-    formatter.timeStyle = .medium
-    return formatter
-}()
-
 #Preview {
-    ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    ContentView()
+        .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
 }
